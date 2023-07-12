@@ -1138,7 +1138,7 @@ const sessionMiddleware = session({
   secret: global.config.sessionSecret,
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: global.config.secureCookie }
+  cookie: { secure: global.config.secureCookie, sameSite: 'none' }
 
 });
 app.use(sessionMiddleware);

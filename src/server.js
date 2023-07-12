@@ -1125,6 +1125,7 @@ app.locals.cwd = cwd;
 app.use(express.static(cwd + '/www/public'));
 app.set('views', cwd + '/www/views');
 app.set('view engine', 'ejs');
+// app.set('trust proxy', 1);
 
 app.use(require('morgan')('combined'));
 app.use(require('cookie-parser')());
@@ -1133,12 +1134,13 @@ app.use(require('body-parser').urlencoded({
 }));
 app.use(require('body-parser').json());
 
+
 const session = require("express-session");
 const sessionMiddleware = session({
   secret: global.config.sessionSecret,
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: global.config.secureCookie, sameSite: 'none' }
+  cookie: { secure: global.config.secureCookie, sameSite: 'none', proxy: true }
 
 });
 app.use(sessionMiddleware);

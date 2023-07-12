@@ -1125,7 +1125,7 @@ app.locals.cwd = cwd;
 app.use(express.static(cwd + '/www/public'));
 app.set('views', cwd + '/www/views');
 app.set('view engine', 'ejs');
-// app.set('trust proxy', 1);
+app.set('trust proxy', 1);
 
 app.use(require('morgan')('combined'));
 app.use(require('cookie-parser')());

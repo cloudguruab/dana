@@ -1,0 +1,6 @@
+[submodule "third_party/jquery"]
+	path = third_party/jquery
+	url = https://github.com/jquery/jquery
+[submodule "third_party/bootstrap"]
+	path = third_party/bootstrap
+	url = https://github.com/twbs/bootstrap

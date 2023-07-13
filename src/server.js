@@ -19,6 +19,7 @@
 /* eslint-env es6 */
 
 const cwd = process.cwd();
+const dataFolder = process.env.DANA_ROOT_FOLDER || cwd;
 const fs = require('fs');
 const moduleAnalyse = require(cwd + '/src/analyse');
 const moduleHtmlBuilder = require(cwd + '/src/htmlBuilder');
@@ -170,8 +171,7 @@ function createSnapshotProjectId(projectId) {
 }
 
 function sendDailyReport(projectId) {
-
-  var danaUrl =
+  let danaUrl =
     'http://' + global.config.server.ip + ':' +
     global.config.server.port;
 
@@ -181,11 +181,11 @@ function sendDailyReport(projectId) {
 
   moduleHtmlBuilder.bodyTableTd([
     'Project Id',
-    '<b>' + projectId + '<b>'
+    '<b>' + projectId + '<b>',
   ]);
   moduleHtmlBuilder.bodyTableTd([
     'Project description',
-    '<b>' + global.projectsConfig[projectId].description + '<b>'
+    '<b>' + global.projectsConfig[projectId].description + '<b>',
   ]);
 
   moduleHtmlBuilder.bodyTableEnd();
@@ -204,8 +204,9 @@ function sendDailyReport(projectId) {
         // convert an existing database
         if (st === 'new') st = 'failingNeedstriage';
 
-        if (s.new === undefined)
-          continue;
+        if (s.new === undefined) {
+continue;
+}
         delete s.new;
 
         if (st === 'failingNeedstriage') {
@@ -221,19 +222,20 @@ function sendDailyReport(projectId) {
             s.status.failingSince,
             s.status.lastExecuted,
             '<a href=' + danaUrl +
-            '/serie?' + projectId + '?' + encodeURIComponent(k[ii]) + '>View</a>'
+            '/serie?' + projectId + '?' + encodeURIComponent(k[ii]) + '>View</a>',
           ]);
         }
       }
-      if (!first)
-        moduleHtmlBuilder.bodyTableEnd();
-      else
-        moduleHtmlBuilder.bodyPar('None');
+      if (!first) {
+moduleHtmlBuilder.bodyTableEnd();
+} else {
+moduleHtmlBuilder.bodyPar('None');
+}
       global.projects[projectId].infos.writeSync('tests.series', tests);
     }
   }
 
-  var dataBenchmarksNew = [];
+  let dataBenchmarksNew = [];
   if (global.projects[projectId].infos.existsSync('benchmarks.series')) {
     let benchmarks = global.projects[projectId].infos
       .readSync('benchmarks.series');
@@ -241,8 +243,9 @@ function sendDailyReport(projectId) {
     if (k.length !== 0) {
       for (let ii = 0; ii < k.length; ii++) {
         let s = benchmarks[k[ii]];
-        if (s.new === undefined)
-          continue;
+        if (s.new === undefined) {
+continue;
+}
         delete s.new;
         let st = s.state;
         // convert an existing database
@@ -251,10 +254,10 @@ function sendDailyReport(projectId) {
 
         dataBenchmarksNew.push({
           serieId: k[ii],
-          ratio: benchmarks[k[ii]].status.current.ratio * 1
+          ratio: benchmarks[k[ii]].status.current.ratio * 1,
         });
       }
-      global.projects[projectId].infos.writeSync('benchmarks.series', benchmarks)
+      global.projects[projectId].infos.writeSync('benchmarks.series', benchmarks);
       dataBenchmarksNew.sort(function(a, b) {
         return a.ratio - b.ratio;
       });
@@ -271,12 +274,13 @@ function sendDailyReport(projectId) {
             s.status.current.average * 1,
             s.status.current.ratio * 1,
             '<a href=' + danaUrl +
-            '/serie?' + projectId + '?' + encodeURIComponent(dataBenchmarksNew[ii].serieId) + '>View</a>'
+            '/serie?' + projectId + '?' + encodeURIComponent(dataBenchmarksNew[ii].serieId) + '>View</a>',
           ]);
         }
         moduleHtmlBuilder.bodyTableEnd();
-      } else
-        moduleHtmlBuilder.bodyPar('None');
+      } else {
+moduleHtmlBuilder.bodyPar('None');
+}
     }
   }
 
@@ -289,12 +293,13 @@ function sendDailyReport(projectId) {
       let compare;
       compare = global.projects[projectId].infos
         .readSync('benchmarks.compare_' + compareId);
-      var dataCompareNew = [];
+      let dataCompareNew = [];
       let kk = Object.keys(compare);
       for (let jj = 0; jj < kk.length; jj++) {
         let s = compare[kk[jj]];
-        if (s.new === undefined)
-          continue;
+        if (s.new === undefined) {
+continue;
+}
         delete s.new;
 
         let st = s.state;
@@ -304,11 +309,11 @@ function sendDailyReport(projectId) {
         let p = s.result.diff / s.result.compareValue * 100;
         dataCompareNew.push({
           serieId: kk[jj],
-          p: p
-        })
+          p: p,
+        });
       }
       global.projects[projectId].infos
-        .writeSync('benchmarks.compare_' + compareId, compare)
+        .writeSync('benchmarks.compare_' + compareId, compare);
       numBenchmarksComparesNew += dataCompareNew.length;
       dataCompareNew.sort(function(a, b) {
         return a.p - b.p;
@@ -321,24 +326,28 @@ function sendDailyReport(projectId) {
           let s = compare[dataCompareNew[jj].serieId];
           let ratio;
           let p = dataCompareNew[jj].p;
-          if (s.result.diff == 0)
-            ratio = '0%';
-          if (s.result.diff > 0)
-            ratio = '+' + p.toFixed(2) + '%';
-          if (s.result.diff < 0)
-            ratio = p.toFixed(2) + '%';
+          if (s.result.diff == 0) {
+ratio = '0%';
+}
+          if (s.result.diff > 0) {
+ratio = '+' + p.toFixed(2) + '%';
+}
+          if (s.result.diff < 0) {
+ratio = p.toFixed(2) + '%';
+}
           moduleHtmlBuilder.bodyTableTd([
             dataCompareNew[jj].serieId,
             s.result.myValue * 1,
             s.result.compareValue * 1,
             ratio,
             '<a href=' + danaUrl +
-            '/serie?' + projectId + '?' + encodeURIComponent(dataCompareNew[jj].serieId) + '>View</a>'
+            '/serie?' + projectId + '?' + encodeURIComponent(dataCompareNew[jj].serieId) + '>View</a>',
           ]);
         }
         moduleHtmlBuilder.bodyTableEnd();
-      } else
-        moduleHtmlBuilder.bodyPar('None');
+      } else {
+moduleHtmlBuilder.bodyPar('None');
+}
     }
   }
 
@@ -351,36 +360,37 @@ function sendDailyReport(projectId) {
   let subject = projectId + ' on ' + date.toLocaleString();
   if (numTestsNew !== 0) {
     if (numTestsNew === 1) {
-      subject += ' - ' + numTestsNew + '  New test'
+      subject += ' - ' + numTestsNew + '  New test';
     } else {
-      subject += ' - ' + numTestsNew + '  New tests'
+      subject += ' - ' + numTestsNew + '  New tests';
     }
   }
   if (dataBenchmarksNew.length !== 0) {
     if (dataBenchmarksNew.length === 1) {
-      subject += ' - 1  New regression'
+      subject += ' - 1  New regression';
     } else {
-      subject += ' - ' + dataBenchmarksNew.length + '  New regressions'
+      subject += ' - ' + dataBenchmarksNew.length + '  New regressions';
     }
   }
   if (numBenchmarksComparesNew !== 0) {
     if (numBenchmarksComparesNew === 1) {
-      subject += ' - ' + numBenchmarksComparesNew + '  New lower'
+      subject += ' - ' + numBenchmarksComparesNew + '  New lower';
     } else {
-      subject += ' - ' + numBenchmarksComparesNew + '  New lowers'
+      subject += ' - ' + numBenchmarksComparesNew + '  New lowers';
     }
   }
-  //sendMail.sendMail(global.projectsConfig[projectId].users, '', subject, report);
+  // sendMail.sendMail(global.projectsConfig[projectId].users, '', subject, report);
 
-  if (global.emailIsEnabled)
-    moduleSendMail.sendMail('gcabillic@google.com', '', subject, report);
+//   if (global.emailIsEnabled) {
+// moduleSendMail.sendMail('gcabillic@google.com', '', subject, report);
+// }
 
   if (!fs.existsSync(cwd + '/www/public/dailyReports')) {
     fs.mkdirSync(cwd + '/www/public/dailyReports');
   }
 
-  fs.writeFileSync(cwd + '/www/public/dailyReports/' + projectId + '.html', '<H3>' + subject + '<br></H3>')
-  fs.appendFileSync(cwd + '/www/public/dailyReports/' + projectId + '.html', report)
+  fs.writeFileSync(cwd + '/www/public/dailyReports/' + projectId + '.html', '<h3>' + subject + '<br></h3>');
+  fs.appendFileSync(cwd + '/www/public/dailyReports/' + projectId + '.html', report);
 }
 
 /**
@@ -503,7 +513,7 @@ function apiAddSerie(apiData, hdl) {
   // This is done per field to avoid discarding existing data if not supplied
   // in the payload.
   if (serie.analyse === undefined) {
-    serie.analyse = {}
+    serie.analyse = {};
   }
   if (analyse.base) {
     serie.analyse.base = analyse.base;
@@ -519,7 +529,7 @@ function apiAddSerie(apiData, hdl) {
     serie.assignee = {};
   }
 
-  if (global.debug) console.log('apiAddSerie update', serieId, 'to', serie)
+  if (global.debug) console.log('apiAddSerie update', serieId, 'to', serie);
 
   global.projects[projectId].series.writeSync(serieId, serie);
 
@@ -583,7 +593,7 @@ function apiAddSample(apiData, hdl) {
     if (apiData.samples) {
       return hdl('Invalid data, sample and samples are both defined');
     }
-    apiData.samples = [apiData.sample]
+    apiData.samples = [apiData.sample];
   }
   samples = apiData.samples;
 
@@ -681,7 +691,7 @@ function apiAddSample(apiData, hdl) {
       moduleAnalyse.analyse(serie);
 
       if (serie.analyseResult.summary.reduceBaseTo) {
-        if (global.debug) console.log('Reset base to', serie.analyseResult.summary.reduceBaseTo, serieId)
+        if (global.debug) console.log('Reset base to', serie.analyseResult.summary.reduceBaseTo, serieId);
         serie.analyse.base = serie.analyseResult.summary.reduceBaseTo;
       }
 
@@ -705,19 +715,21 @@ function apiAddSample(apiData, hdl) {
         } else {
           serie.assignee.analyse = undefined;
           if (serie.analyseResult.summary.status === 'improvement') {
-            if (st === undefined)
-              serie.state.analyse = 'improvementNeedstriage';
-            else if (st.indexOf('improvement') === -1)
-              serie.state.analyse = 'improvementNeedstriage';
+            if (st === undefined) {
+serie.state.analyse = 'improvementNeedstriage';
+} else if (st.indexOf('improvement') === -1) {
+serie.state.analyse = 'improvementNeedstriage';
+}
           } else {
-            if (st === undefined)
-              serie.state.analyse = 'similarNeedstriage';
-            else if (st.indexOf('similar') === -1)
-              serie.state.analyse = 'similarNeedstriage';
+            if (st === undefined) {
+serie.state.analyse = 'similarNeedstriage';
+} else if (st.indexOf('similar') === -1) {
+serie.state.analyse = 'similarNeedstriage';
+}
           }
         }
       } else {
-        //TODO: noisy management to know if serie is back to a normal mode
+        // TODO: noisy management to know if serie is back to a normal mode
       }
 
       // series management
@@ -732,9 +744,11 @@ function apiAddSample(apiData, hdl) {
         assignee: serie.assignee.analyse,
       };
       if (newRegression) series[serieId].new = true;
-      if (serie.url !== undefined)
-        if (serie.url[serie.lastBuildId])
-          series[serieId].url = serie.url[serie.lastBuildId];
+      if (serie.url !== undefined) {
+if (serie.url[serie.lastBuildId]) {
+series[serieId].url = serie.url[serie.lastBuildId];
+}
+}
       global.projects[projectId].infos.writeSync('benchmarks.series', series);
     }
 
@@ -771,8 +785,9 @@ function apiAddSample(apiData, hdl) {
 
       let cpProjectId = cp.compareWith.projectId;
 
-      if (cp.filter)
-        if (serieId.indexOf(cp.filter) === -1) continue;
+      if (cp.filter) {
+if (serieId.indexOf(cp.filter) === -1) continue;
+}
 
       let cpSerie;
       let cpSerieId = serieId;
@@ -818,15 +833,17 @@ function apiAddSample(apiData, hdl) {
         } else {
           serie.assignee.compares[compareId] = undefined;
           if (result.status === 'better') {
-            if (st === undefined)
-              serie.state.compares[compareId] = 'betterNeedstriage';
-            else if (st.indexOf('better') === -1)
-              serie.state.compares[compareId] = 'betterNeedstriage';
+            if (st === undefined) {
+serie.state.compares[compareId] = 'betterNeedstriage';
+} else if (st.indexOf('better') === -1) {
+serie.state.compares[compareId] = 'betterNeedstriage';
+}
           } else {
-            if (st === undefined)
-              serie.state.compares[compareId] = 'similarNeedstriage';
-            else if (st.indexOf('similar') === -1)
-              serie.state.compares[compareId] = 'similarNeedstriage';
+            if (st === undefined) {
+serie.state.compares[compareId] = 'similarNeedstriage';
+} else if (st.indexOf('similar') === -1) {
+serie.state.compares[compareId] = 'similarNeedstriage';
+}
           }
         }
 
@@ -839,9 +856,11 @@ function apiAddSample(apiData, hdl) {
           result: result,
           description: cp.description,
         };
-        if (serie.url !== undefined)
-          if (serie.url[serie.lastBuildId])
-            serie.compares[compareId].url = serie.url[serie.lastBuildId];
+        if (serie.url !== undefined) {
+if (serie.url[serie.lastBuildId]) {
+serie.compares[compareId].url = serie.url[serie.lastBuildId];
+}
+}
 
         // compares file
         let compare = {};
@@ -876,15 +895,15 @@ function apiAddSample(apiData, hdl) {
     serie.lastBuildId = k[0];
 
     if (apiData.skipAnalysis !== true) {
-
       // analysis
       moduleAnalyse.analyse(serie);
 
       // convert an existing database
-      if (serie.state.analyse === 'failing')
-        serie.state.analyse = 'failingNeedstriage';
-      else
-        serie.state.analyse = 'passing';
+      if (serie.state.analyse === 'failing') {
+serie.state.analyse = 'failingNeedstriage';
+} else {
+serie.state.analyse = 'passing';
+}
 
       if (serie.analyseResult.isPassing) {
         serie.state.analyse = 'passing';
@@ -907,15 +926,17 @@ function apiAddSample(apiData, hdl) {
         state: serie.state.analyse,
       };
       if (newRegression) series[serieId].new = true;
-      if (serie.url !== undefined)
-        if (serie.url[serie.lastBuildId])
-          series[serieId].url = serie.url[serie.lastBuildId];
+      if (serie.url !== undefined) {
+if (serie.url[serie.lastBuildId]) {
+series[serieId].url = serie.url[serie.lastBuildId];
+}
+}
 
       global.projects[projectId].infos.writeSync('tests.series', series);
     }
   }
 
-  if (global.debug) console.log('apiAddSample update', serieId, 'to', serie)
+  if (global.debug) console.log('apiAddSample update', serieId, 'to', serie);
   global.projects[projectId].series.writeSync(serieId, serie);
 
   if (!global.admin.existsSync('globalStats')) {
@@ -992,12 +1013,12 @@ if (!fs.existsSync(cwd + '/configs/db')) {
 }
 
 if (!fs.existsSync(cwd + '/configs/client_secret.json')) {
-  console.log('configs/client_secret.json not found, disabling email reports')
+  console.log('configs/client_secret.json not found, disabling email reports');
   global.emailIsEnabled = false;
 }
 
 if (!fs.existsSync(cwd + '/configs/gmail-credentials.json')) {
-  console.log('configs/gmail-credentials.json not found, disabling email reports')
+  console.log('configs/gmail-credentials.json not found, disabling email reports');
   global.emailIsEnabled = false;
 }
 const ModuleFiles = require(cwd + '/src/files');
@@ -1135,12 +1156,12 @@ app.use(require('body-parser').urlencoded({
 app.use(require('body-parser').json());
 
 
-const session = require("express-session");
+const session = require('express-session');
 const sessionMiddleware = session({
   secret: global.config.sessionSecret,
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: global.config.secureCookie, sameSite: 'none', proxy: true }
+  cookie: {secure: global.config.secureCookie, sameSite: 'none', proxy: true},
 
 });
 app.use(sessionMiddleware);
@@ -1154,11 +1175,11 @@ app.use(passport.session());
 app.get('/',
   // require('connect-ensure-login').ensureLoggedIn(),
   function(req, res) {
-    if (global.config.defaultUrl)
-      res.redirect(global.config.defaultUrl);
-    else
-      res.redirect('/admin/viewProjects');
-
+    if (global.config.defaultUrl) {
+res.redirect(global.config.defaultUrl);
+} else {
+res.redirect('/admin/viewProjects');
+}
   });
 
 app.get('/login',
@@ -1174,7 +1195,7 @@ app.post('/login',
   passport.authenticate('local', {
     successRedirect: '/admin/viewProjects',
     failureRedirect: '/login',
-    failureFlash: true
+    failureFlash: true,
   }));
 
 app.get('/logout',
@@ -1255,8 +1276,9 @@ app.get('/admin/*',
 app.post('/admin/addComparator',
   require('connect-ensure-login').ensureLoggedIn(),
   function(req, res) {
-    if (global.debug)
-      console.log('/admin/addComparator', req.body);
+    if (global.debug) {
+console.log('/admin/addComparator', req.body);
+}
 
     // if (req.user.username !== 'admin') {
     //   appError(req, res, '/bot/addRepository, You must be an administrator');
@@ -1302,8 +1324,8 @@ app.post('/admin/addComparator',
       }
       replace = {
         substr: req.body.with_useReplace_substr,
-        newSubStr: req.body.with_useReplace_newSubStr
-      }
+        newSubStr: req.body.with_useReplace_newSubStr,
+      };
     }
     compareWith.replace = replace;
 
@@ -1319,8 +1341,8 @@ app.post('/admin/addComparator',
       projectId: projectId,
       filter: filter,
       useAverage: useAverage,
-      compareWith: compareWith
-    }
+      compareWith: compareWith,
+    };
     global.admin.writeSync('compares', global.comparesConfig);
 
     res.redirect('/admin/viewCompares');
@@ -1337,7 +1359,7 @@ app.post('/admin/addComparator',
 app.post('/admin/saveComparator',
   require('connect-ensure-login').ensureLoggedIn(),
   function(req, res) {
-    //if (global.debug)
+    // if (global.debug)
     console.log('/admin/saveComparator', req.body);
 
     // if (req.user.username !== 'admin') {
@@ -1384,8 +1406,8 @@ app.post('/admin/saveComparator',
       }
       replace = {
         substr: req.body.with_useReplace_substr,
-        newSubStr: req.body.with_useReplace_newSubStr
-      }
+        newSubStr: req.body.with_useReplace_newSubStr,
+      };
     }
     compareWith.replace = replace;
 
@@ -1401,8 +1423,8 @@ app.post('/admin/saveComparator',
       projectId: projectId,
       filter: filter,
       useAverage: useAverage,
-      compareWith: compareWith
-    }
+      compareWith: compareWith,
+    };
     global.admin.writeSync('compares', global.comparesConfig);
 
     res.redirect('/admin/viewCompares');
@@ -1411,8 +1433,9 @@ app.post('/admin/saveComparator',
 app.post('/admin/deleteComparator',
   require('connect-ensure-login').ensureLoggedIn(),
   function(req, res) {
-    if (global.debug)
-      console.log('/admin/deleteComparator', req.body);
+    if (global.debug) {
+console.log('/admin/deleteComparator', req.body);
+}
 
     // if (req.user.username !== 'admin') {
     //   appError(req, res, '/bot/addRepository, You must be an administrator');
@@ -1448,7 +1471,7 @@ app.post('/admin/addProject',
       appError(req, res, '/admin/addProject, project of ' + req.body.projectId + ' already exist');
       return;
     }
-    var users = req.body.users.replace(/\r\n/g, ",");
+    let users = req.body.users.replace(/\r\n/g, ',');
     let dp;
     let useBugTracker = false;
     if (req.body.bugtracker === 'bugtracker') useBugTracker = true;
@@ -1458,8 +1481,8 @@ app.post('/admin/addProject',
       defaultPage: dp,
       infos: req.body.infos,
       users: users,
-      useBugTracker: useBugTracker
-    }
+      useBugTracker: useBugTracker,
+    };
     global.admin.writeSync('projects', global.projectsConfig);
 
     global.projects[projectId] = {};
@@ -1490,7 +1513,7 @@ app.post('/admin/saveProject',
       return;
     }
 
-    var users = req.body.users.replace(/\r\n/g, ",");
+    let users = req.body.users.replace(/\r\n/g, ',');
     let dp;
     if (req.body.defaultPage !== '') dp = req.body.defaultPage;
     let useBugTracker = false;
@@ -1500,8 +1523,8 @@ app.post('/admin/saveProject',
       defaultPage: dp,
       infos: req.body.infos,
       users: users,
-      useBugTracker: useBugTracker
-    }
+      useBugTracker: useBugTracker,
+    };
     global.admin.writeSync('projects', global.projectsConfig);
     res.redirect('/admin/viewProjects');
   });
@@ -1524,7 +1547,7 @@ app.post('/admin/deleteProject',
     global.projects[projectId].series.deleteSyncAll();
     global.projects[projectId].comments.deleteSyncAll();
     global.projects[projectId].infos.deleteSyncAll();
-    ModuleFiles.deleteFolderRecursive(cwd + '/configs/db/' + projectId)
+    ModuleFiles.deleteFolderRecursive(cwd + '/configs/db/' + projectId);
     res.redirect('/admin/viewProjects');
   });
 
@@ -1566,18 +1589,18 @@ app.post('/apis/*', function(req, res, next) {
     return res.send('Expected application/json Content-Type');
   }
 
-  const { authorization } = req.headers
+  const {authorization} = req.headers;
   if (!authorization) {
-    return res.status(401).send('Missing authorization header')
+    return res.status(401).send('Missing authorization header');
   }
 
-  const [authType, token] = authorization.trim().split(' ')
+  const [authType, token] = authorization.trim().split(' ');
   if (authType !== 'Bearer') {
-    return res.status(401).send('Expected a Bearer token')
+    return res.status(401).send('Expected a Bearer token');
   }
 
   if (token != global.config.apiToken) {
-    return res.status(401).send('Wrong token')
+    return res.status(401).send('Wrong token');
   }
 
   next();
@@ -1686,7 +1709,7 @@ server.listen(global.config.server.port, function() {
 
 const io = require('socket.io')(server);
 
-const wrap = middleware => (socket, next) => middleware(socket.request, {}, next);
+const wrap = (middleware) => (socket, next) => middleware(socket.request, {}, next);
 
 io.use(wrap(sessionMiddleware));
 io.use(wrap(passport.initialize()));
@@ -1772,7 +1795,7 @@ io.on('connection', function(socket) {
       return;
     }
     req.serie = global.projects[projectId].series.readSync(serieId);
-    if (global.debug) console.log('getOneSerie query', serieId, 'result', req.serie)
+    if (global.debug) console.log('getOneSerie query', serieId, 'result', req.serie);
 
     req.serie.comments = global.projects[projectId].comments.readSync(serieId);
     socket.emit('receiveOneSerie', req);
@@ -1880,22 +1903,25 @@ io.on('connection', function(socket) {
 
       if (st !== 'similarNoisy') {
         if (serie.analyseResult.summary.status === 'regression') {
-          if (st === undefined)
-            serie.state.analyse = 'regressionNeedstriage';
-          else if (st.indexOf('regression') === -1)
-            serie.state.analyse = 'regressionNeedstriage';
+          if (st === undefined) {
+serie.state.analyse = 'regressionNeedstriage';
+} else if (st.indexOf('regression') === -1) {
+serie.state.analyse = 'regressionNeedstriage';
+}
         } else {
           serie.assignee.analyse = undefined;
           if (serie.analyseResult.summary.status === 'improvement') {
-            if (st === undefined)
-              serie.state.analyse = 'improvementNeedstriage';
-            else if (st.indexOf('improvement') === -1)
-              serie.state.analyse = 'improvementNeedstriage';
+            if (st === undefined) {
+serie.state.analyse = 'improvementNeedstriage';
+} else if (st.indexOf('improvement') === -1) {
+serie.state.analyse = 'improvementNeedstriage';
+}
           } else {
-            if (st === undefined)
-              serie.state.analyse = 'similarNeedstriage';
-            else if (st.indexOf('similar') === -1)
-              serie.state.analyse = 'similarNeedstriage';
+            if (st === undefined) {
+serie.state.analyse = 'similarNeedstriage';
+} else if (st.indexOf('similar') === -1) {
+serie.state.analyse = 'similarNeedstriage';
+}
           }
         }
       } else {
@@ -1925,12 +1951,14 @@ io.on('connection', function(socket) {
         let compareId = k[ii];
         let cp = global.comparesConfig[compareId];
         if (cp.projectId !== projectId) continue;
-        if (cp.filter)
-          if (serieId.indexOf(cp.filter) === -1) continue;
+        if (cp.filter) {
+if (serieId.indexOf(cp.filter) === -1) continue;
+}
         let cpSerie;
         let cpSerieId = serieId;
-        if (cp.compareWith.replace)
-          cpSerieId = cpSerieId.replace(cp.compareWith.replace.substr, cp.compareWith.replace.newSubStr);
+        if (cp.compareWith.replace) {
+cpSerieId = cpSerieId.replace(cp.compareWith.replace.substr, cp.compareWith.replace.newSubStr);
+}
         let cpProjectId = cp.compareWith.projectId;
         if ((cpProjectId === projectId) && (cpSerieId === serieId)) {
           cpSerie = serie;
@@ -1955,22 +1983,25 @@ io.on('connection', function(socket) {
           if (st === 'wontfix') st = 'lowerIntended';
 
           if (result.status === 'lower') {
-            if (st === undefined)
-              serie.state.compares[compareId] = 'lowerNeedstriage';
-            else if (st.indexOf('lower') === -1)
-              serie.state.compares[compareId] = 'lowerNeedstriage';
+            if (st === undefined) {
+serie.state.compares[compareId] = 'lowerNeedstriage';
+} else if (st.indexOf('lower') === -1) {
+serie.state.compares[compareId] = 'lowerNeedstriage';
+}
           } else {
             serie.assignee.compares[compareId] = undefined;
             if (result.status === 'better') {
-              if (st === undefined)
-                serie.state.compares[compareId] = 'betterNeedstriage';
-              else if (st.indexOf('better') === -1)
-                serie.state.compares[compareId] = 'betterNeedstriage';
+              if (st === undefined) {
+serie.state.compares[compareId] = 'betterNeedstriage';
+} else if (st.indexOf('better') === -1) {
+serie.state.compares[compareId] = 'betterNeedstriage';
+}
             } else {
-              if (st === undefined)
-                serie.state.compares[compareId] = 'similarNeedstriage';
-              else if (st.indexOf('similar') === -1)
-                serie.state.compares[compareId] = 'similarNeedstriage';
+              if (st === undefined) {
+serie.state.compares[compareId] = 'similarNeedstriage';
+} else if (st.indexOf('similar') === -1) {
+serie.state.compares[compareId] = 'similarNeedstriage';
+}
             }
           }
 
@@ -2000,16 +2031,18 @@ io.on('connection', function(socket) {
       moduleAnalyse.analyse(serie);
 
       // convert an existing database
-      if (serie.state.analyse === 'failing')
-        serie.state.analyse = 'failingNeedstriage';
-      else
-        serie.state.analyse = 'passing';
+      if (serie.state.analyse === 'failing') {
+serie.state.analyse = 'failingNeedstriage';
+} else {
+serie.state.analyse = 'passing';
+}
 
       if (serie.analyseResult.isPassing) {
         serie.state.analyse = 'passing';
       } else {
-        if (serie.state.analyse.indexOf('failing') === -1)
-          serie.state.analyse = 'failingNeedstriage';
+        if (serie.state.analyse.indexOf('failing') === -1) {
+serie.state.analyse = 'failingNeedstriage';
+}
       }
 
       // series management
@@ -2153,15 +2186,17 @@ io.on('connection', function(socket) {
       let t = '';
       if (serie.assignee.analyse !== assignee) {
         t += '<i>Regression analysis assignee updated ';
-        if (serie.assignee.analyse)
-          t += serie.assignee.analyse;
-        else
-          t += 'None';
+        if (serie.assignee.analyse) {
+t += serie.assignee.analyse;
+} else {
+t += 'None';
+}
         t += ' -> ';
-        if (assignee)
-          t += assignee;
-        else
-          t += 'None';
+        if (assignee) {
+t += assignee;
+} else {
+t += 'None';
+}
         t += '</i><br>';
         serie.assignee.analyse = assignee;
       }
@@ -2202,15 +2237,17 @@ io.on('connection', function(socket) {
       if (serie.assignee.compares[compareId] !== assignee) {
         t += '<i>Assignee for ' + compares[compareId].description +
           ' updated ';
-        if (serie.assignee.compares[compareId])
-          t += serie.assignee.compares[compareId];
-        else
-          t += 'None';
+        if (serie.assignee.compares[compareId]) {
+t += serie.assignee.compares[compareId];
+} else {
+t += 'None';
+}
         t += ' -> ';
-        if (assignee)
-          t += assignee;
-        else
-          t += 'None';
+        if (assignee) {
+t += assignee;
+} else {
+t += 'None';
+}
         t += '</i><br>';
         serie.assignee.compares[compareId] = assignee;
       }
@@ -2251,7 +2288,7 @@ io.on('connection', function(socket) {
     }
 
     let comment = {
-      text: ''
+      text: '',
     };
     let state = req.state;
     console.log('serieUpdateSeriesState', req);
@@ -2295,10 +2332,12 @@ io.on('connection', function(socket) {
           serie.state.analyse + ' -> ' +
           state + '</i><br>';
         if (serie.analyse.benchmark) {
-          if (state === 'regressionNoisy')
-            state = 'similarNoisy';
-          if (state === 'improvementNoisy')
-            state = 'similarNoisy';
+          if (state === 'regressionNoisy') {
+state = 'similarNoisy';
+}
+          if (state === 'improvementNoisy') {
+state = 'similarNoisy';
+}
         }
         serie.state.analyse = state;
       }
@@ -2329,7 +2368,6 @@ io.on('connection', function(socket) {
         global.projects[projectId].infos.writeSync('tests.series', series);
       }
     } else {
-
       if (!global.comparesConfig[compareId]) {
         let e = 'socket serieUpdateState compareId compares doesnt exist ' +
           compareId;
@@ -2384,7 +2422,7 @@ io.on('connection', function(socket) {
     }
 
     let comment = {
-      text: ''
+      text: '',
     };
     let bugLink = req.bugLink;
     console.log('serieUpdateBugLink', req);
